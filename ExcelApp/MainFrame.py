@@ -1,6 +1,7 @@
 import tkinter as tk
 import ProgramMain
 import tkinter.filedialog
+from tkdnd_wrapper import TkDND
 
 
 ######################################################################################
@@ -15,24 +16,23 @@ class MainFrame(tk.Frame):
         newfile = tkinter.filedialog.askopenfilename(title = "Select a .txt file")
         obj.selectedfilename.set(newfile)
 
-    def windowAddRow(self):
-        self.rows += 1
-        self.inputrowcount += 1
-        self.fileinput = FileInput(self)
+    #def windowAddRow(self):
+    #    self.rows += 1
+    #    self.inputrowcount += 1
+    #    self.fileinput = FileInput(self)
 
-    def windowRemoveRow(self):
-        if len(self.inputlist) > 1:
-            todelete = self.inputlist[-1]
-            todelete.inputfile.destroy()
-            todelete.inputlabel.destroy()
-            todelete.inputbrowse.destroy()
-            self.rows -= 1
-            self.inputrowcount -= 1
-            del self.inputlist[-1]
+    #def windowRemoveRow(self):
+    #    if len(self.inputlist) > 1:
+    #        todelete = self.inputlist[-1]
+    #        todelete.inputfile.destroy()
+    #        todelete.inputlabel.destroy()
+    #        todelete.inputbrowse.destroy()
+    #        self.rows -= 1
+    #        del self.inputlist[-1]
 
     def clearInputs(self):
-        for entry in self.inputlist:
-            entry.selectedfilename.set("")
+        self.fileinput.selectedfilenames.set("Your files will show up here.")
+        self.inputlist = []
 
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
@@ -44,10 +44,14 @@ class MainFrame(tk.Frame):
         self.infoblock = InfoBlock(self)
         self.templateinput = TemplateInput(self)
         self.fileinputheader = FileInputHeader(self)
-        self.windowAddRow()
-        self.windowAddRow()
-        self.windowAddRow()
-        self.grid(padx=4, pady=30)
+        self.fileinput = FileInput(self)
+        #self.windowAddRow()
+        #self.windowAddRow()
+        #self.windowAddRow()
+        self.grid(padx=4, pady=5)
+
+
+
 
 
 ######################################################################################
@@ -124,18 +128,18 @@ class FileInputHeader(tk.Frame):
         tk.Frame.__init__(self, parent)
         rownum = parent.rows
 
-        self.fileheaderinfo = tk.Label(parent, text = "Select the mailing count files below. Use the buttons below to add and remove extra fields.")
+        self.fileheaderinfo = tk.Label(parent, text = "Drag and drop all log files into the black box below.")
         self.fileheaderinfo.grid(row=rownum, column=2, columnspan=3, sticky = tk.W, pady=0)
-        rownum += 1
+        #rownum += 1
 
-        self.rowincrease = tk.Button(parent, text = "Add New Field", command=lambda: parent.windowAddRow())
-        self.rowincrease.grid(row=rownum, column = 2, sticky = tk.W + tk.E, padx=10)
+        #self.rowincrease = tk.Button(parent, text = "Add New Field", command=lambda: parent.windowAddRow())
+        #self.rowincrease.grid(row=rownum, column = 2, sticky = tk.W + tk.E, padx=10)
 
-        self.rowremove = tk.Button(parent, text = "Remove Last Field", command=lambda: parent.windowRemoveRow())
-        self.rowremove.grid(row=rownum, column = 3, sticky = tk.W + tk.E, padx=10)
+        #self.rowremove = tk.Button(parent, text = "Remove Last Field", command=lambda: parent.windowRemoveRow())
+        #self.rowremove.grid(row=rownum, column = 3, sticky = tk.W + tk.E, padx=10)
 
-        self.clearinputs = tk.Button(parent, text = "Clear all fields", command=lambda: parent.clearInputs())
-        self.clearinputs.grid(row=rownum, column = 4, sticky = tk.W + tk.E, padx=10)
+        self.clearinputs = tk.Button(parent, text = "Clear filenames", command=lambda: parent.clearInputs())
+        self.clearinputs.grid(row=rownum, column=5, columnspan=2, sticky = tk.W + tk.E, padx=5, ipadx=4)
 
         rownum += 1
         parent.rows = rownum
@@ -149,24 +153,25 @@ class FileInputHeader(tk.Frame):
 class FileInput(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
-        self.selectedfilename = tk.StringVar()
-        self.labelnum = str(parent.inputrowcount)
-        if len(self.labelnum) < 2:
-            self.labelnum = "0" + self.labelnum
+        self.selectedfilenames = tk.StringVar()
+        self.selectedfilenames.set("Your files will show up here.")
+        ##self.labelnum = str(parent.inputrowcount)
+        ##if len(self.labelnum) < 2:
+        ##    self.labelnum = "0" + self.labelnum
 
         rownum = parent.rows
         rowcount = parent.inputrowcount
 
-        self.inputlabel = tk.Label(parent, text="File " + self.labelnum + ":")
-        self.inputlabel.grid(row=rownum, column=0, columnspan=2)
+        ##self.inputlabel = tk.Label(parent, text="File " + self.labelnum + ":")
+        ##self.inputlabel.grid(row=rownum, column=0, columnspan=2)
 
-        self.inputfile = tk.Entry(parent, textvariable=self.selectedfilename, width=50)
-        self.inputfile.grid(row=rownum, column=2, columnspan=3, sticky= tk.W + tk.E, pady=5)
+        self.inputbox = tk.Message(parent, textvariable=self.selectedfilenames, width=500, background="grey20", foreground="white", relief="sunken", anchor=tkinter.NW)
+        self.inputbox.grid(row=rownum, column=0, columnspan=7, sticky= tk.N + tk.S+ tk.W + tk.E, pady=5)
 
-        self.inputbrowse = tk.Button(parent, text = "Browse", command=lambda: parent.selectFile(self))
-        self.inputbrowse.grid(row=rownum, column = 5, columnspan=2, sticky = tk.W + tk.E, padx = 5, ipadx = 4)
+        ##self.inputbrowse = tk.Button(parent, text = "Browse", command=lambda: parent.selectFile(self))
+        ##self.inputbrowse.grid(row=rownum, column = 5, columnspan=2, sticky = tk.W + tk.E, padx = 5, ipadx = 4)
 
-        parent.inputlist.append(self)
+        ##parent.inputlist.append(self)
 
 
 ######################################################################################
