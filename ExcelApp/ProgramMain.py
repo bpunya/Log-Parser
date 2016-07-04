@@ -59,12 +59,14 @@ def programStart(self): #self
     # If you want to do more validation for inputs, such as ensuring that users have access to the files, this is where it would happen.
 
     for rawinput in inputslist:
-        try:
-            if rawinput.selectedfilename.get() != "" and debug == False:
-                item = rawinput.selectedfilename.get()
-                filelist.append(item)
-        except:
-            return
+        #try:
+        if os.path.isfile(rawinput) and debug == False:
+            item = rawinput
+            filelist.append(item)
+        #except:
+        #    msg("An error has occured when reading the selected files")
+        #    frame("BACK")
+        #    return
 
     # If debugging is active, use a preset list of files (so you don't have to run the program each time)
     # The first file should always be the template file. The rest should all be valid files. Make sure to properly escape the backslashes.
