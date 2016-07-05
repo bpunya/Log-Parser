@@ -1,9 +1,31 @@
-import tkinter as tk
-import MainFrame as mf
-import AuxillaryFrame as af
+import tkinter
+import MainFrame
+import AuxillaryFrame
+class ApplicationWrapper(tkinter.Frame):
+
+    def onWrapperSizeChange(self, event):
+        self.wrapper.config(scrollregion=self.application.bbox("all"))
+
+    def __init__(self, parent):
+        tkinter.Frame.__init__(self, parent)
+        self.parent = parent
+
+        self.wrapper = tkinter.Canvas(self, bd=0, width=619, height=380)
+        self.scrollbar = tkinter.Scrollbar(self, command=self.wrapper.yview)
+        self.applicationframe = tkinter.Frame(self.wrapper, bd=0)
+        self.application = MainWindow(self.applicationframe)
+
+        self.wrapper.config(yscrollcommand=self.scrollbar.set, scrollregion=self.application.bbox("all"))
+        self.scrollingframe = self.wrapper.create_window(0, 0, window=self.applicationframe, anchor=tkinter.NW)
+
+        self.wrapper.pack(side="left")
+        self.scrollbar.pack(side="right", fill="both")
+        self.application.pack(side="left", fill="both", expand=True)
+
+        self.applicationframe.bind("<Configure>", self.onWrapperSizeChange)
 
 
-class MainApplication(tk.Frame):
+class MainWindow(tkinter.Frame):
 
     # changeFrame is used to handle the switches between the different frames.
     def changeFrame(self, frame):
@@ -34,12 +56,11 @@ class MainApplication(tk.Frame):
             self.back.grid_remove()
 
     def __init__(self, parent):
-        tk.Frame.__init__(self, parent)
-        self.workingmessage = tk.StringVar()
+        tkinter.Frame.__init__(self, parent)
+        self.parent = parent
+        self.workingmessage = tkinter.StringVar()
 
-        self.main = mf.MainFrame(self)
-        self.help = af.HelpFrame(self)
-        self.msg = af.MessageFrame(self)
-        self.back = af.ReturnFrame(self)
-
-        self.grid()
+        self.main = MainFrame.MainFrame(self)
+        self.help = AuxillaryFrame.HelpFrame(self)
+        self.msg = AuxillaryFrame.MessageFrame(self)
+        self.back = AuxillaryFrame.ReturnFrame(self)
