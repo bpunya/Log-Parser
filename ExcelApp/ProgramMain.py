@@ -1,7 +1,7 @@
 import os
 import math
 import string
-import openpyxl as xl
+import openpyxl
 import time
 import tkinter.filedialog
 
@@ -55,18 +55,18 @@ def programStart(self): #self
     elif debug == False:
         filelist.append(template)
 
-    # Add all inputs given that aren't blank to the filelist list.
+    # Add all inputs given that are real to the filelist list.
     # If you want to do more validation for inputs, such as ensuring that users have access to the files, this is where it would happen.
 
     for rawinput in inputslist:
-        #try:
-        if os.path.isfile(rawinput) and debug == False:
-            item = rawinput
-            filelist.append(item)
-        #except:
-        #    msg("An error has occured when reading the selected files")
-        #    frame("BACK")
-        #    return
+        try:
+            if os.path.isfile(rawinput) and debug == False:
+                item = rawinput
+                filelist.append(item)
+        except:
+            msg("An error has occured when reading the selected files")
+            frame("BACK")
+            return
 
     # If debugging is active, use a preset list of files (so you don't have to run the program each time)
     # The first file should always be the template file. The rest should all be valid files. Make sure to properly escape the backslashes.
@@ -160,6 +160,8 @@ The following Dockets are being processed (nothing saved yet):
 ################################################################################
 def safeOpen(filelocation, opentype):
     return open(filelocation, opentype)
+    ## supposed to be a safe open function
+
 
 
 ################################################################################
@@ -186,7 +188,7 @@ def programDebug(docketrequirements, cellcounts):
 ################################################################################
 def programSaveExcelFile(docket): #requires docket
 
-    defaultname = "Generated " + time.strftime("%Y-%m-%d") + ".xlsx"
+    defaultname = "Generated " + time.strftime("%Y-%m-%d") + " at " + time.strftime("%I%p") + ".xlsx"
     excel = [('Microsoft Excel 2007-2013 XML', '.xlsx')]
     docket.save(tkinter.filedialog.asksaveasfilename(filetypes=excel, initialfile=defaultname))
 
@@ -234,12 +236,11 @@ def programParseLogs(filelocation):
     filename = os.path.basename(filelocation)
     log = {}
     # MUST CHANGE WHEN DIFFERENT LOG FILES ARE INPUT #
-    logname = filename[-18:-4]
-    log['name'] = logname
+    log['name'] = filename[-18:-4]
 
+    # Needs a way to verify if this is a log file #
     rawfile = safeOpen(filelocation, 'r')
 
-    countlist = []
     # For loop parses the text file line by line #
     for i, rawline in enumerate(rawfile):
         line = rawline.replace('\n','')
@@ -283,7 +284,7 @@ def cell(column, row):
 ################################################################################
 def programCreateExcelFile(docketrequirements, cellcounts): #docketrequirements, cellcounts
 
-    workbook = xl.Workbook()
+    workbook = openpyxl.Workbook()
     infosheet = workbook.active
 
     # Set up workbook defaults. This is done every time.
@@ -291,6 +292,15 @@ def programCreateExcelFile(docketrequirements, cellcounts): #docketrequirements,
     infosheet['B2'] = "This workbook was automatically generated."
     infosheet['B3'] = "It is advised that you copy and paste from this workbook into the proper files, instead of using this as a base."
     infosheet['B4'] = "The program that was used to create this file cannot update existing files."
+
+    ### Create a worksheet to host all unknown values. It will be used later ###
+    unknowns = workbook.create_sheet()
+    unknowns.title = "Extras"
+    unknowns['A1'] = "Unknown Cell Codes"
+    unknowns['A3'] = "Cell Code"
+    unknowns['B3'] = "Quantity"
+    unknowns['C3'] = "From Cycle"
+    unknownsheetrow = 0
 
     # Create a worksheet for every docket listed in the docket requirements template.
     for docket in docketrequirements:
@@ -320,6 +330,8 @@ def programCreateExcelFile(docketrequirements, cellcounts): #docketrequirements,
                 ### add the quantity into the proper cell.             ###
                 if cellcode in cyclefile:
                     worksheet[cell(v,i)] = int(cyclefile[cellcode])
+                    ### To separate the known from unknown quantities  ###
+                    cyclefile[cellcode] = "PARSED"
                 else:
                     worksheet[cell(v,i)] = 0
 
@@ -333,6 +345,16 @@ def programCreateExcelFile(docketrequirements, cellcounts): #docketrequirements,
         ### Descriptor cells are added here, after you know the totals of everything. ###
         worksheet[cell(0,maxheight)] = "Cycle Total"
         worksheet[cell(maxwidth,-1)] = "Total Items Mailed"
+
+    ### Parse the cycle files again to find all that were not captured by the first sweep.  ###
+    for cyclefile in cellcounts:
+        for i, cellcode in enumerate(cyclefile):
+            if not cyclefile[cellcode] == "PARSED" and not cellcode == 'name':
+                unknowns[cell(0,unknownsheetrow)] = cellcode
+                unknowns[cell(1,unknownsheetrow)] = int(cyclefile[cellcode])
+                unknowns[cell(2,unknownsheetrow)] = cyclefile['name']
+                unknownsheetrow += 1
+
 
     return workbook
 
