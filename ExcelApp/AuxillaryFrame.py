@@ -1,34 +1,31 @@
-import tkinter as tk
+import tkinter
 
 ######################################################################################
-class MessageFrame(tk.Frame):
+class MessageFrame(tkinter.Frame):
     def __init__(self, parent):
-        tk.Frame.__init__(self, parent)
+        tkinter.Frame.__init__(self, parent)
         self.parent = parent
-        self.label = tk.Label(self, textvariable=parent.workingmessage, width = 87, height = 24)
+        self.label = tkinter.Label(self, textvariable=parent.workingmessage, width = 86, height = 20)
         self.label.grid(padx=3, pady=3)
         self.grid_remove()
 
 
 ######################################################################################
-class ReturnFrame(tk.Frame):
+class ReturnFrame(tkinter.Frame):
     def __init__(self, parent):
-        tk.Frame.__init__(self,parent)
+        tkinter.Frame.__init__(self,parent)
         self.parent = parent
-        self.returnbutton = tk.Button(self, textvariable=parent.workingmessage, wraplength=300, width = 87, height = 24, command=lambda: parent.changeFrame("MAIN"))
+        self.returnbutton = tkinter.Button(self, textvariable=parent.workingmessage, wraplength=300, width = 86, height = 20, command=lambda: parent.changeFrame("MAIN"))
         self.returnbutton.grid(padx=1, pady=1)
         self.grid_remove()
 
 
 ######################################################################################
-class HelpFrame(tk.Frame):
+class HelpFrame(tkinter.Frame):
     def __init__(self, parent):
-        tk.Frame.__init__(self, parent)
+        tkinter.Frame.__init__(self, parent)
         self.parent = parent
 
-        infoblocktext = """Created by Bodin Punyaprateep
-
-"""
         helptext = '''This Application was designed to quickly parse log files and create or update Job Dockets for JD employees. This application is not all-purpose and all non-text files that differ from the format listed below will break the program.
 
 
@@ -53,17 +50,11 @@ LINES: ***********CCCC*TTT**QQQQQQQ
     T characters determine whether the line is ignored or kept. QUA values are kept, the rest are ignored
     Q characters determine the quantity of the product that was processed'''
 
-        self.infoblock = tk.Label(self, text = infoblocktext, wraplength = 300)
-        self.infoblock.grid(row=0, sticky = tk.N + tk.E + tk.S + tk.W)
+        self.returnbutton = tkinter.Button(self, text="Click here to return to the input screen", width = 40, command=lambda: parent.changeFrame("MAIN"))
+        self.returnbutton.grid(row=2, pady=10, ipady=5)
 
-        self.returnbutton = tk.Button(self, text="Click here to return to the input screen", width = 40, command=lambda: parent.changeFrame("MAIN"))
-        self.returnbutton.grid(row=1, pady=10, ipady=5)
-
-        self.text = tk.Message(self, text=helptext, width = 580)
-        self.text.grid(row=2, padx=20, pady=10)
-
-        self.returnbutton = tk.Button(self, text="Click here to return to the input screen", width = 40, command=lambda: parent.changeFrame("MAIN"))
-        self.returnbutton.grid(row=3, pady=10, ipady=5)
+        self.text = tkinter.Message(self, text=helptext, width = 580)
+        self.text.grid(row=3, padx=20, pady=10)
 
         self.grid(padx=4, pady=30)
         self.grid_remove()
