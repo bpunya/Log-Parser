@@ -47,7 +47,7 @@ class MainFrame(tkinter.Frame):
         filelist = self.tcl.tk.splitlist(rawfilelist)
         ## IF THERE ARE MULTIPLE FILES OR THE OBJECT IS NOT A FILE, SEND INVALID ##
         if len(filelist)>1 or not(os.path.isfile(filelist[0])):
-            self.templateinput.selectedfilename.set("INVALID INPUT. Only select one file.")
+            self.templateinput.selectedfilename.set("INVALID INPUT. You must select one file.")
         else:
             self.templateinput.selectedfilename.set(filelist[0])
 
@@ -69,7 +69,8 @@ class MainFrame(tkinter.Frame):
             name = os.path.basename(rawfilename)
             filenames.append("File "+str(i+1)+": "+name)
         ## Set the black box to display the formatted input string ##
-        self.fileinput.selectedfilename.set("\n".join(filenames))
+        if len(filenames) > 0:
+            self.fileinput.selectedfilename.set("\n".join(filenames))
 
     def __init__(self, parent):
         tkinter.Frame.__init__(self, parent)
