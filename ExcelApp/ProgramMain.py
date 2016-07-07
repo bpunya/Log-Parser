@@ -87,6 +87,10 @@ def programStart(self): #self
         msg("An error has occured when parsing the template file.")
         frame("BACK")
         return
+    if docketrequirements == False:
+        msg("You do not have permission to read " + filelist[0])
+        frame("BACK")
+        return
 
     # In case the files processed are very large or numerous, this is a message to list the dockets being processed by the program.
     # This will return all dockets listed (properly) in the docket template. If this screen shows incorrect dockets, then there is a problem with the template file.
@@ -119,6 +123,11 @@ The following Dockets are being processed (nothing saved yet):
             frame("BACK")
             return
 
+        if singlelog == False:
+            msg("You do not have permission to read " + currentfile)
+            frame("BACK")
+            return
+
     # Logging should be done here. This is where data collection ends and file creation begins.
     # Add any other logging functions below if you want to check the ability for the program to properly parse template files.
 
@@ -142,7 +151,7 @@ The following Dockets are being processed (nothing saved yet):
     try:
         programSaveExcelFile(docketfile)
     except:
-        msg("An error has occured while processing the file to be saved.")
+        msg("An error has occured while the file was being saved.")
         frame("BACK")
         return
 
@@ -159,9 +168,10 @@ The following Dockets are being processed (nothing saved yet):
 #   This is a safe open() function that checks for user authentication         #
 ################################################################################
 def safeOpen(filelocation, opentype):
-    return open(filelocation, opentype)
-    ## supposed to be a safe open function
-
+    if os.access(filelocation, os.R_OK):
+        return open(filelocation, opentype)
+    else:
+        return False
 
 
 ################################################################################
@@ -203,6 +213,9 @@ def programSaveExcelFile(docket): #requires docket
 def programParseTemplate(filelocation):
 
     rawfile = safeOpen(filelocation, 'r')
+    ## If no access, cancel function ##
+    if rawfile == False:
+        return False
     docketrequirements = []
     docketcodelist = []
     filldocket = False
@@ -240,6 +253,9 @@ def programParseLogs(filelocation):
 
     # Needs a way to verify if this is a log file #
     rawfile = safeOpen(filelocation, 'r')
+    # If access to the file is not allowed, cancel function #
+    if rawfile == False:
+        return False
 
     # For loop parses the text file line by line #
     for i, rawline in enumerate(rawfile):
