@@ -13,8 +13,11 @@ from tkdnd_wrapper import TkDND
 class MainFrame(tkinter.Frame):
 
     def selectFile(self, obj):
+        ## Temporarily hide the main window ##
         tkinter.Tk().withdraw()
+        ## Open a file dialog box and ask for input ##
         newfile = tkinter.filedialog.askopenfilename(title = "Select a .txt file")
+        ## Set the selectedfilename variable to the input ##
         obj.selectedfilename.set(newfile)
 
     #def windowAddRow(self):
@@ -32,12 +35,15 @@ class MainFrame(tkinter.Frame):
     #        del self.inputlist[-1]
 
     def clearInputs(self):
+        ## Clear all input boxes ##
         self.fileinput.selectedfilename.set(self.fileinput.fileinputresetmessage)
         self.templateinput.selectedfilename.set("")
         self.inputlist = []
 
     def handleTemplateInput(self, event):
+        ## Get the dragged file names ##
         rawfilelist = event.data
+        ## Use Tcl_SplitList to split the string ##
         filelist = self.tcl.tk.splitlist(rawfilelist)
         ## IF THERE ARE MULTIPLE FILES OR THE OBJECT IS NOT A FILE, SEND INVALID ##
         if len(filelist)>1 or not(os.path.isfile(filelist[0])):
@@ -46,21 +52,23 @@ class MainFrame(tkinter.Frame):
             self.templateinput.selectedfilename.set(filelist[0])
 
     def handleFileInput(self, event):
+        ## Get the dragged file names ##
         rawfilelist = self.tcl.tk.splitlist(event.data)
+        ## Make into a proper list ##
         newfilelist = list(rawfilelist)
-        newfilelist.sort()
         ## Sorted new data. Check for existing data ##
-        if len(self.inputlist)>0:
-            for item in newfilelist:
-                if not item in self.inputlist:
-                    self.inputlist.append(item)
-            self.inputlist.sort()
-        else:
-            self.inputlist = newfilelist
+        for item in newfilelist:
+            if not item in self.inputlist and os.path.isfile(item):
+                self.inputlist.append(item)
+        ## Sort the filelist so older logs are listed first ##
+        self.inputlist.sort()
+        ## Create a new array to hold all of the filenames to display to the user ##
         filenames = []
         for i, rawfilename in enumerate(self.inputlist):
-            filename = os.path.basename(rawfilename)
-            filenames.append("File "+str(i+1)+": "+filename)
+            ## Format the string so it looks nice ##
+            name = os.path.basename(rawfilename)
+            filenames.append("File "+str(i+1)+": "+name)
+        ## Set the black box to display the formatted input string ##
         self.fileinput.selectedfilename.set("\n".join(filenames))
 
     def __init__(self, parent):
@@ -70,6 +78,7 @@ class MainFrame(tkinter.Frame):
         #self.inputrowcount = 0
         self.inputlist = []
 
+        ## This is a Tcl interpreter ##
         self.tcl = tkinter.Tcl()
         self.infoblock = InfoBlock(self)
         self.templateinput = TemplateInput(self)
@@ -80,6 +89,7 @@ class MainFrame(tkinter.Frame):
         #self.windowAddRow()
         self.grid(padx=4, pady=5)
 
+        ## Bind drag and drop events to the proper objects ##
         dnd = TkDND(self.fileinput)
         dnd.bindtarget(self.fileinput.inputbox, self.handleFileInput, 'text/uri-list')
         dnd.bindtarget(self.templateinput.selectedtemplate, self.handleTemplateInput, 'text/uri-list')
