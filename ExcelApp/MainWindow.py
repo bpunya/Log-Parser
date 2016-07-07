@@ -3,9 +3,11 @@ import MainFrame
 import AuxillaryFrame
 class ApplicationWrapper(tkinter.Frame):
 
+    ## This forces the widget to update its own size for the scrollbar ##
     def onWrapperSizeChange(self, event):
         self.wrapper.config(scrollregion=self.application.bbox("all"))
 
+    ## This wrapper is to allow the scrollbar to work ##
     def __init__(self, parent):
         tkinter.Frame.__init__(self, parent)
         self.parent = parent
