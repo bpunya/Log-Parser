@@ -283,6 +283,18 @@ def programParseTemplate(filelocation):
             incompletedocket = []
             filldocket = not filldocket
 
+        # In case someone forgot to use a space between the docket codes from
+        # the next docket, push the existing docket information into
+        # docketrequirements and make a new object. Don't reset filldocket
+        # because we will continue collection immediately after.
+        elif filldocket and bool(line.split(" ")[0].upper() == "DOCKET"):
+            finisheddocket = incompletedocket[0]
+            finisheddocket.requirements = incompletedocket[1:]
+            docketrequirements.append(finisheddocket)
+            incompletedocket = []
+            newdocket = Docket(line)
+            incompletedocket.append(newdocket)
+
         # If we have not started collection yet (because it is the start of a
         # file or we just finished collecting one docket), then wait for a line
         # the starts with the word "DOCKET". If we find one, start collection.
@@ -314,7 +326,7 @@ def programParseLogs(filelocation):
 
     # This Log dictionary contains a list of all cellcodes and quantities found
     # in the input log file. Keys are cellcodes, quantities are values.
-    if len(filename) > 52:
+    if len(filename) >= 53:
         log['name'] = filename[39:53]
     else:
         return
@@ -328,11 +340,15 @@ def programParseLogs(filelocation):
     for i, rawline in enumerate(rawfile):
         line = rawline.replace('\n', '')
 
+        # We expect to only see lines of 28 characters or more.
+        if len(line) < 28:
+            return
+
         # Check to see if the quantity is real or a duplicate. If real, get the
         # code and quantity and add it to the log dictionary
         if str(line[16:19]) == "QUA":
             cellcode = line[11:15]
-            rawquantity = line[21:]
+            rawquantity = line[21:28]
             # Strip the string of all leading zeroes #
             quantity = rawquantity.lstrip("0")
 
