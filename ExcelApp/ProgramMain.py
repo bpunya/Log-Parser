@@ -19,9 +19,18 @@ class Docket():
 
 
 ###############################################################################
-#   programStart() is the only function directly called by the GUI            #
+#   programStart() is the main function directly called by the GUI.           #
+#                                                                             #
+#   This function only contains error handling and reporting. The functions   #
+#   that directly read log/template files are listed below this one.          #
 ###############################################################################
 
+# The reason why this function takes the MainFrame object as a parameter is
+# because I did not know how else to access the changeFrame function located in
+# the MainWindow object. I will consider different error reporting methods in
+# the future so that a function like this would take just the
+# MainFrame.inputlist and MainFrame.templateinput.selectedfilename variables
+# as parameters as it should.
 
 def programStart(self):
 
@@ -33,7 +42,7 @@ def programStart(self):
         # Make the changeFrame function easier to access.
         self.parent.parent.changeFrame(input)
 
-    # Set debug to true to ignore exception checks (only use with preset files)
+    # Set debug to true to ignore file checks (because you have a preset list)
     # Set logdebug to true to log docket and cellcount objects to console.
     debug = False
     logdebug = False
@@ -50,20 +59,17 @@ def programStart(self):
     # Comment out the second instance of the variable to use the preset
     # filelist for debugging
 
-    # docketrequirements is a list of Docket objects (see above) that contain a
-    # list of cell codes in each active docket.
+    # docketrequirements is a list of Docket objects (see above) that each
+    # contain a list of cell codes required for their respective jobs.
     docketrequirements = []
     # cellcounts is a list of cellcount dictionaries that contain the
-    # quantities of cellcodes mailed in each cycle
+    # quantities of cellcodes mailed in each cycle (log file)
     cellcounts = []
     # filelist is a collection of all files input into the GUI. The first item
     # should always be the template.
     filelist = []
 
-    # Check to see if a template file was included. If not, send the user an
-    # error message and stop the program. All other error catching functions
-    # include the same two msg("ERROR!"), frame("BACK") lines.
-
+    # Check to see if a template file was included.
     if len(template) < 1 and not debug:
         msg("No template file was selected.")
         frame("BACK")
@@ -74,7 +80,6 @@ def programStart(self):
     # Add all inputs given that are real to the filelist list.
     # If you want to do more validation for inputs, such as ensuring that users
     # have access to the files, this is where it would happen.
-
     for rawinput in inputslist:
         try:
             if os.path.isfile(rawinput) and not debug:
@@ -86,10 +91,9 @@ def programStart(self):
             return
 
     # If debugging is active, use a preset list of files (so you don't have to
-    # run the program each time). The first file should always be the template
-    # file. The rest should all be valid files. Make sure to properly escape
-    # the backslashes.
-
+    # manually add them). The first file should always be the template file.
+    # The rest should all be valid files. Make sure to properly escape the
+    # backslashes.
     if debug:
         filelist = []
     if len(filelist) < 2:
@@ -97,11 +101,12 @@ def programStart(self):
         frame("BACK")
         return
 
-    # The first major parsing function. Parses only the template file for
-    # docket information and returns it into the docketrequirements object.
-    # The programParseTemplate function returns a list of Docket objects. On
-    # error, stop the program and return the user.
-
+    # The first major parsing function. The output of this function is a list
+    # of docket objects, each with the form:
+    #       docket = {
+    #                   'name' = docketnumber
+    #                   'requirements' = ["list", "of", "cell", "codes"]
+    #                }
     try:
         docketrequirements = programParseTemplate(filelist[0])
     except:
@@ -117,7 +122,6 @@ def programStart(self):
     # to list the dockets being processed by the program. This will return all
     # dockets listed (properly) in the docket template. If this screen shows
     # incorrect dockets, then there is a problem with the template file.
-
     update = ""
     for item in docketrequirements:
         update = update + item.name + ", "
@@ -137,7 +141,6 @@ The following Dockets are being processed (nothing saved yet):
     #                   'cellcode1' = QUANTITY
     #                   'cellcode2' = QUANTITY
     #                 }
-
     for item in filelist[1:]:
         currentfile = str(item)
         try:
@@ -158,7 +161,6 @@ The following Dockets are being processed (nothing saved yet):
     # Logging should be done here. This is where data collection ends and file
     # creation begins. Add any other logging functions below if you want to
     # check the ability for the program to properly parse template files.
-
     if logdebug:
         programDebug(docketrequirements, cellcounts)
 
@@ -166,7 +168,6 @@ The following Dockets are being processed (nothing saved yet):
     # takes all the docket information and combines them in a
     # single workbook. It CANNOT update existing sheets and so the
     # information inside should be moved to an archivable file
-
     try:
         docketfile = programCreateExcelFile(docketrequirements, cellcounts)
     except:
@@ -174,10 +175,7 @@ The following Dockets are being processed (nothing saved yet):
         frame("BACK")
         return
 
-    # Saving is the last step. Due to the difficulty of handling and saving
-    # multiple files, the spreadsheets are held in a single workbook file.
-    # The docket information is held in separate worksheets in the workbook.
-
+    # Saving is the last step.
     msg("Please save your Excel Workbook. The default name is \"Generated on YYYY-MM-DD\"")
     try:
         programSaveExcelFile(docketfile)
@@ -186,8 +184,10 @@ The following Dockets are being processed (nothing saved yet):
         frame("BACK")
         return
 
+    # Nothing broke!
     msg("Program Complete. Press here to return to the main screen.")
     frame("BACK")
+    return
 
     ##################
     # END OF PROGRAM #
@@ -196,7 +196,9 @@ The following Dockets are being processed (nothing saved yet):
 ###############################################################################
 #   safeOpen()                                                                #
 #                                                                             #
-#   This is a safe open() function that checks for user authentication        #
+#   This is a safe open() function that checks for user authentication.       #
+#   Right after it is used, there should be something that checks to see if   #
+#   the output is False.                                                      #
 ###############################################################################
 
 
@@ -241,13 +243,15 @@ def programSaveExcelFile(docket):
 ###############################################################################
 #   programParseTemplate()                                                    #
 #                                                                             #
-#   This function parses the template file given for docket information. The  #
-#   template file should have a blank line after the end of a docket block.   #
+#   This function goes through the template file and considers all lines      #
+#   beneath a line starting with "Docket" (case-insensitive) as a part of the #
+#   docket requirements for that job. This means that the codes in the        #
+#   template file are case sensitive and any mistakes during its creation     #
+#   will cause this program to completely ignore valid data.                  #
 ###############################################################################
 def programParseTemplate(filelocation):
 
     rawfile = safeOpen(filelocation, 'r')
-    # If no access, cancel function #
     if not rawfile:
         return False
 
@@ -263,7 +267,6 @@ def programParseTemplate(filelocation):
     # initialize it as False
     filldocket = False
 
-    # This function removes all newline characters #
     for i, rawline in enumerate(rawfile):
         line = rawline.replace('\n', '')
 
@@ -271,22 +274,22 @@ def programParseTemplate(filelocation):
             incompletedocket.append(line)
 
         # If there is an empty line and we are currently collecting docket data
-        # stop collection, push the current docket information into a Docket
+        # stop collection, push the current docket information into the Docket
         # object and reset.
         elif filldocket and bool(line == ""):
-            filldocket = not filldocket
             finisheddocket = incompletedocket[0]
             finisheddocket.requirements = incompletedocket[1:]
             docketrequirements.append(finisheddocket)
             incompletedocket = []
+            filldocket = not filldocket
 
         # If we have not started collection yet (because it is the start of a
         # file or we just finished collecting one docket), then wait for a line
-        # with the word "DOCKET" in it. If we find one, start collection.
+        # the starts with the word "DOCKET". If we find one, start collection.
         elif line.split(" ")[0].upper() == "DOCKET":
-            filldocket = not filldocket
             newdocket = Docket(line)
             incompletedocket.append(newdocket)
+            filldocket = not filldocket
 
     # Just in case someone didn't end with a blank line, if we have docket
     # information in incompletedocket, then create a new Docket object with
@@ -295,7 +298,6 @@ def programParseTemplate(filelocation):
         finisheddocket = incompletedocket[0]
         finisheddocket.requirements = incompletedocket[1:]
         docketrequirements.append(finisheddocket)
-        incompletedocket = []
 
     return docketrequirements
 
@@ -307,12 +309,15 @@ def programParseTemplate(filelocation):
 ###############################################################################
 def programParseLogs(filelocation):
 
+    log = {}
     filename = os.path.basename(filelocation)
 
     # This Log dictionary contains a list of all cellcodes and quantities found
-    # in the parsed log file. Keys are cellcodes, quantities are values.
-    log = {}
-    log['name'] = filename[-18:-4]
+    # in the input log file. Keys are cellcodes, quantities are values.
+    if len(filename) > 52:
+        log['name'] = filename[39:53]
+    else:
+        return
 
     # Needs a way to verify if this is a log file. If access to the file is not
     # allowed, cancel function.
@@ -320,13 +325,12 @@ def programParseLogs(filelocation):
     if not rawfile:
         return False
 
-    # For loop parses the text file line by line #
     for i, rawline in enumerate(rawfile):
         line = rawline.replace('\n', '')
 
         # Check to see if the quantity is real or a duplicate. If real, get the
         # code and quantity and add it to the log dictionary
-        if str(line[16:19]).upper() == "QUA":
+        if str(line[16:19]) == "QUA":
             cellcode = line[11:15]
             rawquantity = line[21:]
             # Strip the string of all leading zeroes #
@@ -351,7 +355,7 @@ def programParseLogs(filelocation):
 ###############################################################################
 def cell(column, row):
 
-    # This function only works when column is less than 676
+    # This function only works when column is less than 676. Above that... :(
     if column <= 25:
         columnvalue = string.ascii_uppercase[column]
     else:
@@ -374,7 +378,6 @@ def programCreateExcelFile(docketrequirements, cellcounts):
     workbook = openpyxl.Workbook()
     infosheet = workbook.active
 
-    # Set up workbook defaults. This is done every time.
     infosheet.title = "Read Me"
     infosheet['B2'] = "This workbook was automatically generated."
     infosheet['B3'] = "It is advised that you copy and paste from this workbook into the proper files, instead of using this as a base."
@@ -387,6 +390,7 @@ def programCreateExcelFile(docketrequirements, cellcounts):
     unknowns['A3'] = "Cell Code"
     unknowns['B3'] = "Quantity"
     unknowns['C3'] = "From Cycle"
+    # This is increased later when we add rows to the sheet
     unknownsheetrow = 0
 
     # Create a worksheet for every docket listed in the docket requirements
@@ -430,23 +434,23 @@ def programCreateExcelFile(docketrequirements, cellcounts):
                     worksheet[cell(v, i)] = 0
 
             # While the function is still iterating left to right, add a totals
-            # column to show the total for that row.
+            # cell on the right to show the total for that row.
             worksheet[cell(maxwidth, i)] = "=SUM(" + cell(1, i) + ":" + cell(maxwidth-1, i) + ")"
 
         # After the program is done adding all rows (it finished adding all
-        # cellcodes from the docketrequirements file, This adds the bottom
-        # totals row to show the totals from each cycle file.
+        # cellcodes from the docketrequirements file), this adds a totals row
+        # on the bottom to show the totals from each cycle file.
         for x in range(0, maxwidth + 1):
             worksheet[cell(x, maxheight)] = "=SUM(" + cell(x, 0) + ":" + cell(x, i) + ")"
 
-        # Just so that the workbook looks nicer
+        # Just so that the worksheet looks nicer
         worksheet[cell(0, maxheight)] = "Cycle Total"
         worksheet[cell(maxwidth, -1)] = "Total Items Mailed"
 
-    # Parse the cycle files again to find all codes that were not captured by
-    # the first sweep.
+    # Read the cycle files again to find all codes that were not captured by
+    # the first sweep. We'll put them on the unknowns worksheet.
     for cyclefile in cellcounts:
-        for i, cellcode in enumerate(cyclefile):
+        for cellcode in cyclefile:
             if not cyclefile[cellcode] == "PARSED" and not cellcode == 'name':
                 unknowns[cell(0, unknownsheetrow)] = cellcode
                 unknowns[cell(1, unknownsheetrow)] = int(cyclefile[cellcode])

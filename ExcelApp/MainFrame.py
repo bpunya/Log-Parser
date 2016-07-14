@@ -16,20 +16,24 @@ from tkdnd_wrapper import TkDND
 class MainFrame(tkinter.Frame):
 
     def selectFile(self, obj):
-        # Temporarily hide the main window , then open a file dialog box.
+        # This function is in case the user wants to use the browse button to
+        # select their template file. The log files must be click+dragged.
+
         tkinter.Tk().withdraw()
         newfile = tkinter.filedialog.askopenfilename(title="Select a .txt file")
-        # Set the selectedfilename variable to the input
         obj.selectedfilename.set(newfile)
 
     def clearInputs(self):
-        # Clear all input boxes #
+        # Called whenever the "Reset Filenames" button is used.
+
         self.fileinput.selectedfilename.set(self.fileinput.fileinputresetmessage)
         self.templateinput.selectedfilename.set("")
         self.inputlist = []
 
     def handleTemplateInput(self, event):
-        # Get the dragged file names
+        # This function is called everytime items are dragged onto the template
+        # selection box.
+
         rawfilelist = event.data
         # Use Tcl_SplitList to split the string
         filelist = self.tcl.tk.splitlist(rawfilelist)
@@ -40,7 +44,9 @@ class MainFrame(tkinter.Frame):
             self.templateinput.selectedfilename.set(filelist[0])
 
     def handleFileInput(self, event):
-        # Get the dragged file names #
+        # This function is called everytime items are dragged onto the black
+        # file input box at the bottom of the window.
+
         rawfilelist = event.data
         # Make into a proper list #
         newfilelist = list(self.tcl.tk.splitlist(rawfilelist))
@@ -51,7 +57,6 @@ class MainFrame(tkinter.Frame):
             if item not in self.inputlist and os.path.isfile(item):
                 self.inputlist.append(item)
 
-        # Sort the filelist so older logs are listed first #
         self.inputlist.sort()
 
         # filenames is an array that will hold all of the formatted filenames
