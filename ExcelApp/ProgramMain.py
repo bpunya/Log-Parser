@@ -36,11 +36,11 @@ def programStart(self):
 
     def msg(input):
         # Make the message change function easier to access.
-        self.parent.parent.workingmessage.set(input)
+        self.parent.workingmessage.set(input)
 
     def frame(input):
         # Make the changeFrame function easier to access.
-        self.parent.parent.changeFrame(input)
+        self.parent.changeFrame(input)
 
     # Set debug to true to ignore file checks (because you have a preset list)
     # Set logdebug to true to log docket and cellcount objects to console.
@@ -51,9 +51,9 @@ def programStart(self):
     frame("MSG")
 
     template = ""
-    template = self.parent.templateinput.selectedfilename.get()
+    template = self.templateinput.selectedfilename.get()
     inputslist = []
-    inputslist = list(self.parent.inputlist)
+    inputslist = list(self.inputlist)
 
     # Doubles of the variables are listed above for easy debugging.
     # Comment out the second instance of the variable to use the preset

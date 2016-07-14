@@ -108,7 +108,7 @@ This app will only accept .txt files as input and will create a new excel file a
         self.infoblock = tkinter.Label(parent, text=self.infoblocktext, wraplength=450)
         self.infoblock.grid(row=rownum, rowspan=4, column=2, columnspan=3, sticky=tkinter.N + tkinter.E + tkinter.S + tkinter.W)
 
-        self.confirmfiles = tkinter.Button(parent, text="Run Program", command=lambda: ProgramMain.programStart(self))
+        self.confirmfiles = tkinter.Button(parent, text="Run Program", command=lambda: ProgramMain.programStart(parent))
         self.confirmfiles.grid(row=rownum, column=5, columnspan=2, sticky=tkinter.N + tkinter.E + tkinter.S + tkinter.W,)
         rownum += 1
 
