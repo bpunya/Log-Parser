@@ -1,26 +1,28 @@
 import tkinter
 
-######################################################################################
+###############################################################################
+
+
 class MessageFrame(tkinter.Frame):
     def __init__(self, parent):
         tkinter.Frame.__init__(self, parent)
         self.parent = parent
-        self.label = tkinter.Label(self, textvariable=parent.workingmessage, width = 86, height = 20)
+        self.label = tkinter.Label(self, textvariable=parent.workingmessage, width=86, height=20)
         self.label.grid(padx=3, pady=3)
         self.grid_remove()
 
 
-######################################################################################
+###############################################################################
 class ReturnFrame(tkinter.Frame):
     def __init__(self, parent):
-        tkinter.Frame.__init__(self,parent)
+        tkinter.Frame.__init__(self, parent)
         self.parent = parent
-        self.returnbutton = tkinter.Button(self, textvariable=parent.workingmessage, wraplength=300, width = 86, height = 20, command=lambda: parent.changeFrame("MAIN"))
+        self.returnbutton = tkinter.Button(self, textvariable=parent.workingmessage, wraplength=300, width=86, height=20, command=lambda: parent.changeFrame("MAIN"))
         self.returnbutton.grid(padx=1, pady=1)
         self.grid_remove()
 
 
-######################################################################################
+###############################################################################
 class HelpFrame(tkinter.Frame):
     def __init__(self, parent):
         tkinter.Frame.__init__(self, parent)
@@ -50,14 +52,14 @@ LINES: ***********CCCC*TTT**QQQQQQQ
     T characters determine whether the line is ignored or kept. QUA values are kept, the rest are ignored
     Q characters determine the quantity of the product that was processed'''
 
-        self.returnbutton = tkinter.Button(self, text="Click here to return to the input screen", width = 40, command=lambda: parent.changeFrame("MAIN"))
+        self.returnbutton = tkinter.Button(self, text="Click here to return to the input screen", width=40, command=lambda: parent.changeFrame("MAIN"))
         self.returnbutton.grid(row=2, pady=10, ipady=5)
 
-        self.text = tkinter.Message(self, text=helptext, width = 580)
+        self.text = tkinter.Message(self, text=helptext, width=580)
         self.text.grid(row=3, padx=20, pady=10)
 
         self.grid(padx=4, pady=30)
         self.grid_remove()
 
 
-######################################################################################
+###############################################################################
