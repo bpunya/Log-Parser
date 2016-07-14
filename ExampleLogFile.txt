@@ -1,0 +1,12 @@
+# The program expects log filenames to be in this format:
+ABC_RETURN_ABC_CELL_COUNTS_P_01012015_S20151225000000
+
+# The cyclename would be 20151225000000
+
+
+# The program expects lines in the logs to be in this format:
+ABC_DE17600AB01(QUA)=0000469
+ABC_DE17600AB02(QUA)=0000034
+
+# The cell codes are AB01 and AB02
+# The quantities are 469 and 34 respectively.
