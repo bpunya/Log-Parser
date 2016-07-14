@@ -102,12 +102,12 @@ def programStart(self):
     # The programParseTemplate function returns a list of Docket objects. On
     # error, stop the program and return the user.
 
-    #try:
-    docketrequirements = programParseTemplate(filelist[0])
-    #except:
-    #    msg("An error has occured when parsing the template file.")
-    #    frame("BACK")
-    #    return
+    try:
+        docketrequirements = programParseTemplate(filelist[0])
+    except:
+        msg("An error has occured when parsing the template file.")
+        frame("BACK")
+        return
     if not docketrequirements:
         msg("You do not have permission to read " + filelist[0])
         frame("BACK")
