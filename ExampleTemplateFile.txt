@@ -1,0 +1,23 @@
+In this template file, there are three dockets/jobs. 
+The program will look for the codes XYZ50 and XYZ60 when creating the worksheet for "Docket 125".
+These lines above the line "Docket 123" will be ignored.
+
+Docket 123
+ABC01
+ABC02
+DEF01
+DEF02
+GHI10
+GHI20
+
+Docket 124
+ABC03
+ABC04
+DEF03
+DEF04
+GHI30
+GHI40
+
+Docket 125
+XYZ50
+XYZ60
