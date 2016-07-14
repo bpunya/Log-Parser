@@ -3,4 +3,32 @@ Runs in Python 3.5, requires Openpyxl (http://openpyxl.readthedocs.io/) and the 
 
 tkdnd_wrapper.py taken from mmpg on stackoverflow.
 
-Runs with main.py
+Starts through main.py
+
+
+Format of the nested classes is as follows:
+# Parent
+# |
+# |-- Child
+
+
+root (TK instance)
+|
+|-- application (ApplicationWrapper)
+    |
+    |-- scrollbar (Scrollbar)
+    |-- main (MainWindow)
+        |-- changeFrame()
+        |
+        |-- msg (MessageFrame)
+        |-- help (HelpFrame)
+        |-- back (ReturnFrame)
+        |-- main (MainFrame)
+            |-- selectFile(), clearInputs(), handleTempalteInput(), handleFileInput()
+            |
+            |-- tcl (Tcl interpreter)
+            |-- infoblock (InfoBlock) >>> Accesses ProgramMain.startProgram()
+            |-- templateinput (TemplateInput)
+            |-- fileinputheader (FileInputHeader)
+            |-- fileinput (FileInput)
+                
