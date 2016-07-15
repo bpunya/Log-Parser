@@ -270,7 +270,19 @@ def programParseTemplate(filelocation):
     for i, rawline in enumerate(rawfile):
         line = rawline.replace('\n', '')
 
-        if filldocket and bool(line != ""):
+        # In case someone forgot to use a space between the docket codes from
+        # the next docket, push the existing docket information into
+        # docketrequirements and make a new object. Don't reset filldocket
+        # because we will continue collection immediately after.
+        if filldocket and bool(line.split(" ")[0].upper() == "DOCKET"):
+            finisheddocket = incompletedocket[0]
+            finisheddocket.requirements = incompletedocket[1:]
+            docketrequirements.append(finisheddocket)
+            incompletedocket = []
+            newdocket = Docket(line)
+            incompletedocket.append(newdocket)
+
+        elif filldocket and bool(line != ""):
             incompletedocket.append(line)
 
         # If there is an empty line and we are currently collecting docket data
@@ -283,18 +295,6 @@ def programParseTemplate(filelocation):
             incompletedocket = []
             filldocket = not filldocket
 
-        # In case someone forgot to use a space between the docket codes from
-        # the next docket, push the existing docket information into
-        # docketrequirements and make a new object. Don't reset filldocket
-        # because we will continue collection immediately after.
-        elif filldocket and bool(line.split(" ")[0].upper() == "DOCKET"):
-            finisheddocket = incompletedocket[0]
-            finisheddocket.requirements = incompletedocket[1:]
-            docketrequirements.append(finisheddocket)
-            incompletedocket = []
-            newdocket = Docket(line)
-            incompletedocket.append(newdocket)
-
         # If we have not started collection yet (because it is the start of a
         # file or we just finished collecting one docket), then wait for a line
         # the starts with the word "DOCKET". If we find one, start collection.
@@ -306,7 +306,7 @@ def programParseTemplate(filelocation):
     # Just in case someone didn't end with a blank line, if we have docket
     # information in incompletedocket, then create a new Docket object with
     # that information.
-    if len(incompletedocket) > 0:
+    if len(incompletedocket) > 1:
         finisheddocket = incompletedocket[0]
         finisheddocket.requirements = incompletedocket[1:]
         docketrequirements.append(finisheddocket)
@@ -335,7 +335,7 @@ def programParseLogs(filelocation):
     # allowed, cancel function.
     rawfile = safeOpen(filelocation, 'r')
     if not rawfile:
-        return False
+        return
 
     for i, rawline in enumerate(rawfile):
         line = rawline.replace('\n', '')
