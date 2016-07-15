@@ -275,9 +275,11 @@ def programParseTemplate(filelocation):
         # docketrequirements and make a new object. Don't reset filldocket
         # because we will continue collection immediately after.
         if filldocket and bool(line.split(" ")[0].upper() == "DOCKET"):
-            finisheddocket = incompletedocket[0]
-            finisheddocket.requirements = incompletedocket[1:]
-            docketrequirements.append(finisheddocket)
+            if len(incompletedocket) > 1:  # Make sure it has info in it.
+                finisheddocket = incompletedocket[0]
+                finisheddocket.requirements = incompletedocket[1:]
+                docketrequirements.append(finisheddocket)
+
             incompletedocket = []
             newdocket = Docket(line)
             incompletedocket.append(newdocket)
@@ -289,9 +291,11 @@ def programParseTemplate(filelocation):
         # stop collection, push the current docket information into the Docket
         # object and reset.
         elif filldocket and bool(line == ""):
-            finisheddocket = incompletedocket[0]
-            finisheddocket.requirements = incompletedocket[1:]
-            docketrequirements.append(finisheddocket)
+            if len(incompletedocket) > 1:  # Make sure it has info in it.
+                finisheddocket = incompletedocket[0]
+                finisheddocket.requirements = incompletedocket[1:]
+                docketrequirements.append(finisheddocket)
+
             incompletedocket = []
             filldocket = not filldocket
 
