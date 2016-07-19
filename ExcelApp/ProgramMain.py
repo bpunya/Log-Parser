@@ -329,7 +329,7 @@ def programParseLogs(filelocation):
     filename = os.path.basename(filelocation)
 
     # This Log dictionary contains a list of all cellcodes and quantities found
-    # in the input log file. Keys are cellcodes, quantities are values.
+    # in the input log file. Cellcodes are keys, quantities are values.
     if len(filename) >= 53:
         log['name'] = filename[39:53]
     else:
