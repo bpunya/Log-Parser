@@ -57,7 +57,7 @@ class MainFrame(tkinter.Frame):
             if item not in self.inputlist and os.path.isfile(item):
                 self.inputlist.append(item)
 
-        self.inputlist.sort()
+        self.inputlist.sort(key=str.lower)
 
         # filenames is an array that will hold all of the formatted filenames
         # from inputlist.
