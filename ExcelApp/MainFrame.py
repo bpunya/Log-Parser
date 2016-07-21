@@ -79,6 +79,8 @@ class MainFrame(tkinter.Frame):
 
         # This is a Tcl interpreter
         self.tcl = tkinter.Tcl()
+        
+        # This is where the actual GUI is initialized
         self.infoblock = InfoBlock(self)
         self.templateinput = TemplateInput(self)
         self.fileinputheader = FileInputHeader(self)
