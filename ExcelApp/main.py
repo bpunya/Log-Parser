@@ -28,7 +28,7 @@ root.mainloop()
 #         |-- help (HelpFrame)
 #         |-- back (ReturnFrame)
 #         |-- main (MainFrame)
-#             |-- selectFile(), clearInputs(), handleTempalteInput(), handleFileInput()
+#             |-- selectFile(), clearInputs(), handleTemplateInput(), handleFileInput()
 #             |
 #             |-- tcl (Tcl interpreter)
 #             |-- infoblock (InfoBlock) >>> Accesses ProgramMain.programStart()
