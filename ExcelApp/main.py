@@ -31,7 +31,7 @@ root.mainloop()
 #             |-- selectFile(), clearInputs(), handleTempalteInput(), handleFileInput()
 #             |
 #             |-- tcl (Tcl interpreter)
-#             |-- infoblock (InfoBlock) >>> Accesses ProgramMain.startProgram()
+#             |-- infoblock (InfoBlock) >>> Accesses ProgramMain.programStart()
 #             |-- templateinput (TemplateInput)
 #             |-- fileinputheader (FileInputHeader)
 #             |-- fileinput (FileInput)
