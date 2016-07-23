@@ -1,6 +1,6 @@
 In this template file, there are three valid dockets/jobs. Docket 123 has 6 codes, Docket 125 has 6 codes and Docket 127 has 2 codes.
 Numbers 124 and 126 are ignored because 124 has no codes in it, and 126 has a space directly after the Docket line.
-The program will look for the codes XYZ50 and XYZ60 when creating the worksheet for "Docket 125".
+The program will look for the codes XYZ50 and XYZ60 when creating the worksheet for "Docket 127".
 These lines above the line "Docket 123" will be ignored.
 
 Docket 123
