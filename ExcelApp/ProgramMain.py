@@ -105,6 +105,7 @@ def programStart(self):
     # of docket objects, each with the form:
     #       docket = {
     #                   'name' = docketnumber
+    #                   'cycle' = cyclenumber
     #                   'requirements' = ["list", "of", "cell", "codes"]
     #                }
     try:
@@ -145,7 +146,6 @@ The following Dockets are being processed (nothing saved yet):
         currentfile = str(item)
         try:
             singlelog = programParseLogs(item)
-            cellcounts.append(dict(singlelog))
         except:
             msg('''An error has occured when parsing a file. File location:
 
@@ -157,6 +157,8 @@ The following Dockets are being processed (nothing saved yet):
             msg("You do not have permission to read " + currentfile)
             frame("BACK")
             return
+        else:
+            cellcounts.append(dict(singlelog))
 
     # Logging should be done here. This is where data collection ends and file
     # creation begins. Add any other logging functions below if you want to
@@ -168,12 +170,12 @@ The following Dockets are being processed (nothing saved yet):
     # takes all the docket information and combines them in a
     # single workbook. It CANNOT update existing sheets and so the
     # information inside should be moved to an archivable file
-    try:
-        docketfile = programCreateExcelFile(docketrequirements, cellcounts)
-    except:
-        msg("An error has occured when creating the excel files.")
-        frame("BACK")
-        return
+    #try:
+    docketfile = programCreateExcelFile(docketrequirements, cellcounts)
+    #except:
+    #    msg("An error has occured when creating the excel files.")
+    #    frame("BACK")
+    #    return
 
     # Saving is the last step.
     msg("Please save your Excel Workbook. The default name is \"Generated on YYYY-MM-DD\"")
@@ -331,7 +333,8 @@ def programParseLogs(filelocation):
     # This Log dictionary contains a list of all cellcodes and quantities found
     # in the input log file. Cellcodes are keys, quantities are values.
     if len(filename) >= 53:
-        log['name'] = filename[39:53]
+        log['timestamp'] = filename[39:53]
+        log['cyclenumber'] = "Cycle " + str(filename[29:31])
     else:
         return
 
@@ -346,7 +349,7 @@ def programParseLogs(filelocation):
 
         # We expect to only see lines of 28 characters or more.
         if len(line) < 28:
-            return
+            break
 
         # Check to see if the quantity is real or a duplicate. If real, get the
         # code and quantity and add it to the log dictionary
@@ -403,16 +406,6 @@ def programCreateExcelFile(docketrequirements, cellcounts):
     infosheet['B3'] = "It is advised that you copy and paste from this workbook into the proper files, instead of using this as a base."
     infosheet['B4'] = "The program that was used to create this file cannot update existing files."
 
-    # Create a worksheet to host all unknown values. It will be used later #
-    unknowns = workbook.create_sheet()
-    unknowns.title = "Extras"
-    unknowns['A1'] = "Unknown Cell Codes"
-    unknowns['A3'] = "Cell Code"
-    unknowns['B3'] = "Quantity"
-    unknowns['C3'] = "From Cycle"
-    # This is increased later when we add rows to the sheet
-    unknownsheetrow = 0
-
     # Create a worksheet for every docket listed in the docket requirements
     # template.
     for docket in docketrequirements:
@@ -428,53 +421,69 @@ def programCreateExcelFile(docketrequirements, cellcounts):
         # This function builds worksheets row by row from left to right.
         # It checks the current job docket for the codes that should be in the
         # cycle files
-        for i, cellcode in enumerate(docket.requirements):
+        for r, cellcode in enumerate(docket.requirements):
 
             # Set the code that it is looking for in the A column
-            worksheet[cell(0, i)] = cellcode
+            worksheet[cell(0, r)] = cellcode
 
             # Now check through each cyclefile to see if that code exists
-            for v, cyclefile in enumerate(cellcounts):
+            for c, cyclefile in enumerate(cellcounts):
 
-                # Add 1 to V otherwise all cells will appear shifted left one.
-                v += 1
+                # Add 1 to column otherwise all cells will appear shifted left one.
+                c += 1
 
                 # Place the name of the cyclefile on row 3. This is done every
                 # time the program goes down a row but that's okay.
-                worksheet[cell(v, -1)] = cyclefile['name']
+                worksheet[cell(c, -1)] = cyclefile['timestamp']
+                worksheet[cell(c, -2)] = cyclefile['cyclenumber']
 
                 # If the cellcode exists in the current cyclefile, add the
                 # quantity into the proper cell.
                 if cellcode in cyclefile:
-                    worksheet[cell(v, i)] = int(cyclefile[cellcode])
+                    worksheet[cell(c, r)] = int(cyclefile[cellcode])
                     # This is to separate the known from the unknown.
                     cyclefile[cellcode] = "PARSED"
                 else:
                     # If it doesn't exist in the current cyclefile, enter 0
-                    worksheet[cell(v, i)] = 0
+                    worksheet[cell(c, r)] = 0
 
             # While the function is still iterating left to right, add a totals
             # cell on the right to show the total for that row.
-            worksheet[cell(maxwidth, i)] = "=SUM(" + cell(1, i) + ":" + cell(maxwidth-1, i) + ")"
+            worksheet[cell(maxwidth, r)] = "=SUM(" + cell(1, r) + ":" + cell(maxwidth-1, r) + ")"
 
         # After the program is done adding all rows (it finished adding all
         # cellcodes from the docketrequirements file), this adds a totals row
         # on the bottom to show the totals from each cycle file.
-        for x in range(0, maxwidth + 1):
-            worksheet[cell(x, maxheight)] = "=SUM(" + cell(x, 0) + ":" + cell(x, i) + ")"
+        for totalscolumn in range(0, maxwidth + 1):
+            worksheet[cell(totalscolumn, maxheight)] = "=SUM(" + cell(totalscolumn, 0) + ":" + cell(totalscolumn, r) + ")"
 
         # Just so that the worksheet looks nicer
         worksheet[cell(0, maxheight)] = "Cycle Total"
         worksheet[cell(maxwidth, -1)] = "Total Items Mailed"
 
+    # PROCESSING COMPLETE   #
+    # UNKNOWNS PARSED BELOW #
+
+    # Create a worksheet to host all unknown values. It will be used later #
+    unknowns = workbook.create_sheet()
+    unknowns.title = "Extras"
+    unknowns['A1'] = "Unknown Cell Codes"
+    unknowns['A3'] = "Cell Code"
+    unknowns['B3'] = "Quantity"
+    unknowns['C3'] = "Cycle number"
+    unknowns['D3'] = "Cycle timestamp"
+    # This is increased later when we add rows to the sheet
+    unknownsheetrow = 0
+
     # Read the cycle files again to find all codes that were not captured by
     # the first sweep. We'll put them on the unknowns worksheet.
     for cyclefile in cellcounts:
         for cellcode in cyclefile:
-            if not cyclefile[cellcode] == "PARSED" and not cellcode == 'name':
+            if not cyclefile[cellcode] == "PARSED" and not cellcode == 'timestamp' and not cellcode == 'cyclenumber':
                 unknowns[cell(0, unknownsheetrow)] = cellcode
                 unknowns[cell(1, unknownsheetrow)] = int(cyclefile[cellcode])
-                unknowns[cell(2, unknownsheetrow)] = cyclefile['name']
+                unknowns[cell(2, unknownsheetrow)] = cyclefile['cyclenumber']
+                unknowns[cell(3, unknownsheetrow)] = cyclefile['timestamp']
                 unknownsheetrow += 1
 
     return workbook
