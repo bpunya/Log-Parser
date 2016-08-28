@@ -170,12 +170,12 @@ The following Dockets are being processed (nothing saved yet):
     # takes all the docket information and combines them in a
     # single workbook. It CANNOT update existing sheets and so the
     # information inside should be moved to an archivable file
-    #try:
-    docketfile = programCreateExcelFile(docketrequirements, cellcounts)
-    #except:
-    #    msg("An error has occured when creating the excel files.")
-    #    frame("BACK")
-    #    return
+    try:
+        docketfile = programCreateExcelFile(docketrequirements, cellcounts)
+    except:
+        msg("An error has occured when creating the excel files.")
+        frame("BACK")
+        return
 
     # Saving is the last step.
     msg("Please save your Excel Workbook. The default name is \"Generated on YYYY-MM-DD\"")
@@ -353,9 +353,9 @@ def programParseLogs(filelocation):
 
         # Check to see if the quantity is real or a duplicate. If real, get the
         # code and quantity and add it to the log dictionary
-        if str(line[16:19]) == "QUA":
-            cellcode = line[11:15]
-            rawquantity = line[21:28]
+        if str(line[17:20]) == "QUA":
+            cellcode = line[12:16]
+            rawquantity = line[22:29]
             # Strip the string of all leading zeroes #
             quantity = rawquantity.lstrip("0")
 
