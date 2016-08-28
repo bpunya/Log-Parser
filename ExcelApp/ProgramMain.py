@@ -477,6 +477,7 @@ def programCreateExcelFile(docketrequirements, cellcounts):
 
     # Read the cycle files again to find all codes that were not captured by
     # the first sweep. We'll put them on the unknowns worksheet.
+    hasExtras = False
     for cyclefile in cellcounts:
         for cellcode in cyclefile:
             if not cyclefile[cellcode] == "PARSED" and not cellcode == 'timestamp' and not cellcode == 'cyclenumber':
@@ -485,6 +486,11 @@ def programCreateExcelFile(docketrequirements, cellcounts):
                 unknowns[cell(2, unknownsheetrow)] = cyclefile['cyclenumber']
                 unknowns[cell(3, unknownsheetrow)] = cyclefile['timestamp']
                 unknownsheetrow += 1
+                hasExtras = True
+
+    if(not hasExtras):
+        unknowns.merge_cells('A4:D4')
+        unknowns['A4'] = "Nothing was left over!"
 
     return workbook
 
